@@ -1,17 +1,19 @@
 const express = require('express');
 const path = require('path');
 const nodemailer = require('nodemailer');
+const multer = require('multer');
 require('dotenv').config();
 
 const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(express.json({ limit: '200kb' }));
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024, files: 5 } });
 
 // Serve static files from repo root
 app.use(express.static(path.join(__dirname)));
 
-app.post('/api/contact', async (req, res) => {
+app.post('/api/contact', upload.array('files', 5), async (req, res) => {
   try {
     const { name, email, company, phone, topic, message, website, consent } = req.body || {};
 
@@ -22,6 +24,13 @@ app.post('/api/contact', async (req, res) => {
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return res.status(400).json({ error: 'Email invalide.' });
+    }
+
+    // Attachments (total <= 10MB)
+    const files = Array.isArray(req.files) ? req.files : [];
+    const total = files.reduce((s, f) => s + (f.size || 0), 0);
+    if (total > 10 * 1024 * 1024) {
+      return res.status(400).json({ error: 'Fichiers trop volumineux (10 Mo max).' });
     }
 
     // SMTP settings
@@ -46,7 +55,9 @@ app.post('/api/contact', async (req, res) => {
     const subject = `[Contact] ${topic || 'Demande'} — ${name}`;
     const text = `Nom: ${name}\nEmail: ${email}\nEntreprise: ${company || ''}\nTéléphone: ${phone || ''}\nSujet: ${topic || ''}\nConsentement: ${consent ? 'oui' : 'non'}\n\nMessage:\n${message}`;
 
-    await transporter.sendMail({ from, to, subject, text, replyTo: email });
+    const attachments = files.map(f => ({ filename: f.originalname, content: f.buffer, contentType: f.mimetype }));
+
+    await transporter.sendMail({ from, to, subject, text, replyTo: email, attachments });
 
     res.json({ ok: true });
   } catch (err) {
@@ -58,4 +69,3 @@ app.post('/api/contact', async (req, res) => {
 app.listen(port, () => {
   console.log(`Taolenn Assistant site on http://localhost:${port}`);
 });
-

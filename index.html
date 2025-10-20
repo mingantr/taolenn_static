@@ -26,7 +26,6 @@
           <a href="#gallery">Captures</a>
           <a href="#services">Services</a>
           <a href="#pricing">Tarifs</a>
-          <a href="#training">Formation</a>
           <a href="#how">Comment ça marche</a>
           <a href="#contact" class="btn btn-primary">Essayer maintenant</a>
         </nav>
@@ -52,6 +51,7 @@
         <div class="container">
           <h2>Services taolenn — Développements à façon (PME/PMI)</h2>
           <p class="lead">Imaginez des automatisations pragmatiques, sans complexité inutile, et un site web statique rapide et sécurisé pour présenter votre activité.</p>
+          <p class="muted">Services accessibles à tous: repérez un besoin, créez un dossier avec <strong>les fichiers d’entrée</strong> et <strong>les fichiers attendus en sortie</strong>; je vous dis ce qu’il est possible d’automatiser et sous quel délai.</p>
           <div class="grid features">
             <article class="card">
               <img class="icon-img" src="assets/icons/styles.png" alt="Site web statique" />
@@ -170,22 +170,6 @@
         </div>
       </section>
 
-      <section id="training" class="section section-alt">
-        <div class="container">
-          <h2>Formation “Taolenn en 1 journée”</h2>
-          <p class="lead">De l’installation aux cas concrets: rédaction d’emails, traductions, conduite de projet, notes et comptes‑rendus avec l’IA.</p>
-          <ol class="steps">
-            <li>Prise en main rapide et bonnes pratiques</li>
-            <li>Workflows d’équipe (projets, tâches, Gantt)</li>
-            <li>Emails, traduction, conseils, chatbot contextualisé</li>
-            <li>Mise en situation et plan d’adoption</li>
-          </ol>
-          <div class="cta">
-            <a href="#contact" class="btn btn-primary" data-topic="Formation 1 journée">Réserver une session</a>
-            <a href="#gallery" class="btn btn-secondary">Voir les captures</a>
-          </div>
-        </div>
-      </section>
 
       <section id="how" class="section">
         <div class="container">
@@ -226,7 +210,6 @@
                 <select name="topic">
                   <option>Abonnement</option>
                   <option>Développements à façon</option>
-                  <option>Formation 1 journée</option>
                   <option>Demande de démo</option>
                   <option>Intégrations et personnalisation</option>
                   <option>Autre</option>
@@ -235,6 +218,10 @@
               <label class="field full">
                 <span>Message</span>
                 <textarea name="message" required minlength="10" rows="6" placeholder="Décrivez votre besoin…"></textarea>
+              </label>
+              <label class="field full">
+                <span>Fichiers (optionnel, 10 Mo max)</span>
+                <input type="file" name="files" id="files" multiple />
               </label>
               <input type="text" name="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true" />
               <label class="consent full">

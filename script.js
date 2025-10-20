@@ -69,23 +69,30 @@ if (form) {
     e.preventDefault();
     statusEl.textContent = '';
 
-    const data = Object.fromEntries(new FormData(form));
-    if (data.website) return; // honeypot
+    const fd = new FormData(form);
+    if (fd.get('website')) return; // honeypot
 
     // Basic validation
-    if (!data.name || !data.email || !data.message || !form.checkValidity()) {
+    if (!form.checkValidity() || !fd.get('name') || !fd.get('email') || !fd.get('message')) {
       statusEl.textContent = 'Veuillez remplir les champs requis.';
       return;
+    }
+
+    // File size guard: total <= 10MB
+    const fileInput = form.querySelector('input[type="file"][name="files"]');
+    if (fileInput && fileInput.files && fileInput.files.length) {
+      let total = 0;
+      for (const f of fileInput.files) total += f.size || 0;
+      if (total > 10 * 1024 * 1024) {
+        statusEl.textContent = 'Taille totale des fichiers > 10 Mo.';
+        return;
+      }
     }
 
     const btn = form.querySelector('button[type="submit"]');
     btn.disabled = true; btn.textContent = 'Envoi…';
     try {
-      const res = await fetch('/api/contact', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
+      const res = await fetch('/api/contact', { method: 'POST', body: fd });
       const out = await res.json().catch(() => ({}));
       if (res.ok) {
         statusEl.textContent = 'Merci, votre message a été envoyé.';
