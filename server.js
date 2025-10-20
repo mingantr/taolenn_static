@@ -10,8 +10,19 @@ const port = process.env.PORT || 3000;
 app.use(express.json({ limit: '200kb' }));
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024, files: 5 } });
 
+// Basic CORS to allow form posts from other origins (e.g., static preview)
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Headers', 'Content-Type');
+  res.header('Access-Control-Allow-Methods', 'POST,OPTIONS');
+  if (req.method === 'OPTIONS') return res.sendStatus(204);
+  next();
+});
+
 // Serve static files from repo root
 app.use(express.static(path.join(__dirname)));
+
+app.get('/health', (req, res) => res.json({ ok: true }));
 
 app.post('/api/contact', upload.array('files', 5), async (req, res) => {
   try {
@@ -33,16 +44,16 @@ app.post('/api/contact', upload.array('files', 5), async (req, res) => {
       return res.status(400).json({ error: 'Fichiers trop volumineux (10 Mo max).' });
     }
 
-    // SMTP settings
-    const host = process.env.SMTP_HOST;
+    // SMTP settings (with aliases for common env names)
+    const host = process.env.SMTP_HOST || process.env.SMTP_SERVER;
     const portS = Number(process.env.SMTP_PORT || 587);
     const user = process.env.SMTP_USER;
     const pass = process.env.SMTP_PASS;
-    const from = process.env.SMTP_FROM || user;
-    const to = process.env.SMTP_TO || user;
+    const from = process.env.SMTP_FROM || process.env.EMAIL_SENDER || user;
+    const to = process.env.SMTP_TO || process.env.EMAIL_RECEIVER || user;
 
     if (!host || !user || !pass) {
-      return res.status(500).json({ error: 'SMTP non configuré (voir .env).' });
+      return res.status(500).json({ error: 'SMTP non configuré (voir .env). Variables requises: SMTP_HOST/SMTP_SERVER, SMTP_PORT, SMTP_USER, SMTP_PASS.' });
     }
 
     const transporter = nodemailer.createTransport({

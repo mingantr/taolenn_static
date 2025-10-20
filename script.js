@@ -90,7 +90,8 @@ if (form) {
     const btn = form.querySelector('button[type="submit"]');
     btn.disabled = true; btn.textContent = 'Envoi…';
     try {
-      const res = await fetch('/api/contact', { method: 'POST', body: fd });
+      const apiBase = (location.origin.startsWith('file:')) ? 'http://localhost:3000' : '';
+      const res = await fetch(apiBase + '/api/contact', { method: 'POST', body: fd });
       const out = await res.json().catch(() => ({}));
       if (res.ok) {
         statusEl.textContent = 'Merci, votre message a été envoyé.';
