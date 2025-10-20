@@ -68,15 +68,13 @@ if (form) {
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     statusEl.textContent = '';
+    // Use native validation UI
+    if (!form.reportValidity()) return;
 
     const fd = new FormData(form);
     if (fd.get('website')) return; // honeypot
 
-    // Basic validation
-    if (!form.checkValidity() || !fd.get('name') || !fd.get('email') || !fd.get('message')) {
-      statusEl.textContent = 'Veuillez remplir les champs requis.';
-      return;
-    }
+    // Basic validation guard (already validated by reportValidity)
 
     // File size guard: total <= 10MB
     const fileInput = form.querySelector('input[type="file"][name="files"]');

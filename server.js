@@ -15,7 +15,7 @@ app.use(express.static(path.join(__dirname)));
 
 app.post('/api/contact', upload.array('files', 5), async (req, res) => {
   try {
-    const { name, email, company, phone, topic, message, website, consent } = req.body || {};
+    const { name, email, company, /* phone, */ topic, message, website, consent } = req.body || {};
 
     // Honeypot + basic validation
     if (website) return res.status(200).json({ ok: true });
@@ -53,7 +53,7 @@ app.post('/api/contact', upload.array('files', 5), async (req, res) => {
     });
 
     const subject = `[Contact] ${topic || 'Demande'} — ${name}`;
-    const text = `Nom: ${name}\nEmail: ${email}\nEntreprise: ${company || ''}\nTéléphone: ${phone || ''}\nSujet: ${topic || ''}\nConsentement: ${consent ? 'oui' : 'non'}\n\nMessage:\n${message}`;
+    const text = `Nom: ${name}\nEmail: ${email}\nEntreprise: ${company || ''}\nSujet: ${topic || ''}\nConsentement: ${consent ? 'oui' : 'non'}\n\nMessage:\n${message}`;
 
     const attachments = files.map(f => ({ filename: f.originalname, content: f.buffer, contentType: f.mimetype }));
 

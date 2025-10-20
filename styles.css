@@ -104,6 +104,8 @@ body {
 .contact-form { margin-top: 12px; }
 .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
 .field, .consent, .actions { display: flex; flex-direction: column; gap: 6px; }
+.consent { flex-direction: row; align-items: center; gap: 10px; }
+.consent input[type="checkbox"] { width: 18px; height: 18px; }
 .full { grid-column: 1 / -1; }
 .field span { font-weight: 500; }
 input[type="text"], input[type="email"], input[type="tel"], select, textarea {
