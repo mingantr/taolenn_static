@@ -14,6 +14,10 @@ If a folder does not yet exist, add it when needed. Keep paths short and use keb
 - Lint/format (if configured): `npm run lint`, `npm run format`
 Prefer simple static serving for `public/` until tooling is added.
 
+Contact form on static hosting
+- The site is now 100% static by default. Configure the contact form by setting the `action` attribute on `index.html:...` to a Form endpoint (e.g., Formspree/Getform).
+- The client script posts `multipart/form-data` to that endpoint and shows inline status messages. Attachments are limited to 10 MB total by client-side guard; provider limits may apply.
+
 ## Coding Style & Naming Conventions
 - Indentation: 2 spaces; max line length 100.
 - HTML: semantic tags; lowercase attributes.

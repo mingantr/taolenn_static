@@ -90,14 +90,20 @@ if (form) {
     const btn = form.querySelector('button[type="submit"]');
     btn.disabled = true; btn.textContent = 'Envoi…';
     try {
-      const apiBase = (location.origin.startsWith('file:')) ? 'http://localhost:3000' : '';
-      const res = await fetch(apiBase + '/api/contact', { method: 'POST', body: fd });
-      const out = await res.json().catch(() => ({}));
-      if (res.ok) {
+      const action = form.getAttribute('action');
+      if (!action) {
+        statusEl.textContent = 'Formulaire non configuré: ajoutez un endpoint (Formspree/Getform).';
+        return;
+      }
+      const res = await fetch(action, { method: 'POST', body: fd, headers: { 'Accept': 'application/json' } });
+      let ok = res.ok;
+      let out = {};
+      try { out = await res.json(); } catch {}
+      if (ok || out.ok) {
         statusEl.textContent = 'Merci, votre message a été envoyé.';
         form.reset();
       } else {
-        statusEl.textContent = out.error || 'Une erreur est survenue. Réessayez.';
+        statusEl.textContent = (out && (out.error || out.message)) || 'Une erreur est survenue. Réessayez.';
       }
     } catch (err) {
       statusEl.textContent = 'Erreur réseau. Vérifiez votre connexion.';

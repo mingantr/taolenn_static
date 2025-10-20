@@ -51,6 +51,9 @@ app.post('/api/contact', upload.array('files', 5), async (req, res) => {
     const pass = process.env.SMTP_PASS;
     const from = process.env.SMTP_FROM || process.env.EMAIL_SENDER || user;
     const to = process.env.SMTP_TO || process.env.EMAIL_RECEIVER || user;
+    const bcc = process.env.SMTP_BCC;
+    const secureOverride = process.env.SMTP_SECURE;
+    const secure = typeof secureOverride !== 'undefined' ? (String(secureOverride).toLowerCase() === 'true') : (portS === 465);
 
     if (!host || !user || !pass) {
       return res.status(500).json({ error: 'SMTP non configuré (voir .env). Variables requises: SMTP_HOST/SMTP_SERVER, SMTP_PORT, SMTP_USER, SMTP_PASS.' });
@@ -59,7 +62,7 @@ app.post('/api/contact', upload.array('files', 5), async (req, res) => {
     const transporter = nodemailer.createTransport({
       host,
       port: portS,
-      secure: portS === 465, // true for 465, false for other ports
+      secure,
       auth: { user, pass },
     });
 
@@ -68,7 +71,14 @@ app.post('/api/contact', upload.array('files', 5), async (req, res) => {
 
     const attachments = files.map(f => ({ filename: f.originalname, content: f.buffer, contentType: f.mimetype }));
 
-    await transporter.sendMail({ from, to, subject, text, replyTo: email, attachments });
+    const info = await transporter.sendMail({ from, to, bcc, subject, text, replyTo: email, attachments });
+    console.log('Mail sent', {
+      messageId: info && info.messageId,
+      accepted: info && info.accepted,
+      rejected: info && info.rejected,
+      response: info && info.response,
+      envelope: info && info.envelope,
+    });
 
     res.json({ ok: true });
   } catch (err) {
@@ -76,6 +86,24 @@ app.post('/api/contact', upload.array('files', 5), async (req, res) => {
     res.status(500).json({ error: 'Impossible d’envoyer le message.' });
   }
 });
+
+// Optional startup SMTP verification to catch config issues early
+(async () => {
+  try {
+    const host = process.env.SMTP_HOST || process.env.SMTP_SERVER;
+    const portS = Number(process.env.SMTP_PORT || 587);
+    const user = process.env.SMTP_USER;
+    const pass = process.env.SMTP_PASS;
+    if (!host || !user || !pass) return; // skip if not configured
+    const secureOverride = process.env.SMTP_SECURE;
+    const secure = typeof secureOverride !== 'undefined' ? (String(secureOverride).toLowerCase() === 'true') : (portS === 465);
+    const transporter = nodemailer.createTransport({ host, port: portS, secure, auth: { user, pass } });
+    await transporter.verify();
+    console.log('SMTP verified:', host, portS, 'secure=', secure);
+  } catch (e) {
+    console.warn('SMTP verify failed:', e && e.message);
+  }
+})();
 
 app.listen(port, () => {
   console.log(`Taolenn Assistant site on http://localhost:${port}`);
